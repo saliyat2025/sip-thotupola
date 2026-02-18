@@ -1,30 +1,37 @@
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { BookOpen, Folder, ArrowRight, Download, Library, Search, GraduationCap } from 'lucide-react';
-import BookCover from '@/components/BookCover';
-import BookCard from '@/components/BookCard';
+import { BookOpen, Folder, ArrowRight, Library, GraduationCap } from 'lucide-react';
+import SearchableBookList from '@/components/SearchableBookList';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function HomePage() {
-    // Fetch Root Categories (parent_id is null)
+    // 1. Fetch the "Novels/Short Stories" category ID dynamically
+    const { data: catData } = await supabase
+        .from('categories')
+        .select('id')
+        .or('name.eq.නවකතා/කෙටිකතා,name.ilike.%Novels%')
+        .limit(1);
+
+    const novelsCatId = catData && catData.length > 0 ? catData[0].id : null;
+
+    // 2. Fetch Root Categories (parent_id is null) - Also exclude Novels from root if it is one
     const { data: rootCategories, error: catError } = await supabase
         .from('categories')
         .select('*')
         .is('parent_id', null)
+        .neq('id', novelsCatId || 0)
         .order('name');
 
-    // Fetch 6 Recent Books
-    const { data: recentBooks, error: bookError } = await supabase
+    // 3. Fetch ALL Books EXCEPT those in the "Novels" category
+    const { data: allBooks, error: bookError } = await supabase
         .from('books')
         .select('*, categories(name)')
-        .order('created_at', { ascending: false })
-        .limit(6);
+        .neq('category_id', novelsCatId || 0)
+        .order('created_at', { ascending: false });
 
     // Debugging Logs
-    console.log("Home Page - Root Categories:", rootCategories);
-    console.log("Home Page - Recent Books:", recentBooks);
     if (catError) console.error("Home Page - Category Fetch Error:", catError);
     if (bookError) console.error("Home Page - Book Fetch Error:", bookError);
 
@@ -53,18 +60,13 @@ export default async function HomePage() {
                         Explore a world of knowledge. Your gateway to free academic resources, textbooks, and digital learning materials.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <a href="#categories" className="px-8 py-4 bg-white text-blue-700 font-bold rounded-2xl shadow-xl hover:bg-cyan-50 transition-all flex items-center gap-2 group">
-                            Start Exploring
+                        <a href="#library" className="px-8 py-4 bg-white text-blue-700 font-bold rounded-2xl shadow-xl hover:bg-cyan-50 transition-all flex items-center gap-2 group">
+                            Explore Library
                             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                         </a>
-                        <div className="relative max-w-md w-full sm:w-auto">
-                            <input
-                                type="text"
-                                placeholder="Search books..."
-                                className="w-full sm:w-80 px-6 py-4 bg-white/10 backdrop-blur-lg border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/50 placeholder:text-white/60 text-white"
-                            />
-                            <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60" size={20} />
-                        </div>
+                        <Link href="/novels" className="px-8 py-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-xl hover:bg-emerald-600 transition-all flex items-center gap-2 group">
+                            📚 Novels & Short Stories
+                        </Link>
                     </div>
                 </div>
 
@@ -93,16 +95,8 @@ export default async function HomePage() {
 
                     {!rootCategories || rootCategories.length === 0 ? (
                         <div className="p-12 bg-white rounded-3xl border border-dashed border-slate-300 text-center">
-                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                                <Search className="text-slate-400" size={32} />
-                            </div>
-                            <h3 className="text-xl font-bold text-slate-800 mb-2">Database Connected, but no Root Categories found.</h3>
-                            <p className="text-slate-500 max-w-md mx-auto">
-                                Check the Admin Panel and ensure you have created at least one category with <strong>NO Parent</strong> (Root Category).
-                            </p>
-                            <Link href="/admin" className="inline-flex items-center gap-2 mt-6 text-blue-600 font-bold hover:underline">
-                                Go to Admin Panel <ArrowRight size={18} />
-                            </Link>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">No Categories Found</h3>
+                            <Link href="/admin" className="text-blue-600 font-bold hover:underline">Go to Admin Panel</Link>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -131,29 +125,25 @@ export default async function HomePage() {
                     )}
                 </section>
 
-                {/* Recent Arrivals Section */}
-                <section>
-                    <div className="flex items-center justify-between mb-10">
+                {/* Library Catalog Section */}
+                <section id="library">
+                    <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-4">
                         <div>
                             <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
                                 <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
                                     <BookOpen size={24} />
                                 </div>
-                                Fresh Arrivals
+                                Digital Library Catalog
                             </h2>
-                            <p className="text-slate-500 mt-2">The latest educational materials added to our library</p>
+                            <p className="text-slate-500 mt-2">Search through our complete collection of resources</p>
                         </div>
                         <Link href="/books" className="text-blue-600 font-semibold hover:underline flex items-center gap-1">
-                            See All Books
+                            Browse Full Catalog
                             <ArrowRight size={16} />
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {recentBooks?.map((book) => (
-                            <BookCard key={book.id} book={book} />
-                        ))}
-                    </div>
+                    <SearchableBookList initialBooks={allBooks || []} />
                 </section>
             </main>
 
