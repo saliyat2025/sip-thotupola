@@ -1,0 +1,26 @@
+e:/Ad web/sip_thotupola/
+├── .env.local              # Supabase credentials (placeholder)
+├── next.config.mjs
+├── package.json
+├── postcss.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+├── src/
+│   ├── app/
+│   │   ├── actions.ts      # Server actions for Admin CRUD
+│   │   ├── admin/
+│   │   │   └── page.tsx    # Admin Dashboard
+│   │   ├── category/
+│   │   │   └── [id]/
+│   │   │       └── page.tsx # Dynamic category view
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx        # Homepage / Root explorer
+│   ├── components/
+│   │   ├── Breadcrumbs.tsx
+│   │   ├── CategoryView.tsx # Recursive UI component
+│   │   └── DownloadButton.tsx # Adsterra monetization button
+│   └── lib/
+│       └── supabase.ts     # Supabase client
+└── supabase/
+    └── schema.sql          # PostgreSQL schema
