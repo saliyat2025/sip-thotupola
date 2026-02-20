@@ -1,7 +1,3 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/page": "app/page.js",
-  "/novels/page": "app/novels/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/books/page": "app/books/page.js"
+  "/page": "app/page.js"
 }

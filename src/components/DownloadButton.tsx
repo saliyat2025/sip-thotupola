@@ -7,7 +7,13 @@ interface DownloadButtonProps {
     targetUrl: string;
 }
 
-const ADSTERRA_LINK = 'https://www.effectivegatecpm.com/a63nr2vkf?key=32845369cebc05b9e5fdda4d685251fc';
+const AD_LINKS = [
+    'https://www.effectivegatecpm.com/a63nr2vkf?key=32845369cebc05b9e5fdda4d685251fc',
+    'https://www.effectivegatecpm.com/iwdza7r813?key=0227d1f7e8aff32e837d52d2386373eb',
+    'https://www.effectivegatecpm.com/vi0xnbvpx?key=cad9200283ad563f0d44d66e7c04119e',
+    'https://www.effectivegatecpm.com/h08kpmtgdm?key=91a1339dbaae7172a9099bbfd502be8c',
+    'https://www.effectivegatecpm.com/gn1sy1w6?key=6186c42796aba59a4659efa24aabb10e'
+];
 
 export const DownloadButton: React.FC<DownloadButtonProps> = ({ targetUrl }) => {
     const [isDownloading, setIsDownloading] = useState(false);
@@ -16,8 +22,10 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({ targetUrl }) => 
         e.preventDefault();
         setIsDownloading(true);
 
-        // 1. Open Adsterra link in a new tab
-        window.open(ADSTERRA_LINK, '_blank');
+        // 1. Pick a random ad link and open it in a new tab
+        const randomIndex = Math.floor(Math.random() * AD_LINKS.length);
+        const randomAdLink = AD_LINKS[randomIndex];
+        window.open(randomAdLink, '_blank');
 
         // 2. Wait 500ms (as requested)
         setTimeout(() => {
